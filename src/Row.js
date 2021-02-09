@@ -3,6 +3,8 @@ import axios from './axios';
 import requests from './requests';
 import './Row.css';
 import YouTube from 'react-youtube';
+import movieTrailer from 'movie-trailer'
+
 
 const base_URL = "https://image.tmdb.org/t/p/original/"
 
@@ -31,6 +33,23 @@ const Row = ({ title , fetchUrl , isLarge}) => {
       },
     };
 
+    const handleClick = (movie) =>{
+      if( trailerUrl){
+        setTrailerUrl('');
+      }
+      else{
+        movieTrailer( movie?.name || movie?.title  || movie?.original_name ||'')
+        .then( (url) => {
+          const urlParams = new URLSearchParams( new URL(url).search)
+          setTrailerUrl(urlParams.get("v"));
+
+        }).catch(err => console.log(err))
+
+      }
+
+
+    }
+
 
   return (
     <div className="row">
@@ -38,17 +57,19 @@ const Row = ({ title , fetchUrl , isLarge}) => {
 
       <div className="row__posters">
         {movies.map( movie => (
-          <img className={`row__poster ${isLarge && "row__posterLarge"}` } 
+          <img 
+          className={`row__poster ${isLarge && "row__posterLarge"}` } 
           key={movie.id}
-          onClick={movie}
-              src={`${base_URL}${isLarge ? movie.poster_path : movie.backdrop_path}`} 
-              alt={movie.name}/>
+          onClick={() => handleClick(movie)}
+          src={`${base_URL}${isLarge ? movie.poster_path : movie.backdrop_path}`} 
+          alt={movie.name}/>
 
         ))}
 
       
       </div>
-        { trailerUrl &&  <YouTube videoId={trailerUrl} opts={opts}/> }
+        {trailerUrl && <YouTube videoId={trailerUrl} opts={opts} />}
+
     </div>
   )
 }
